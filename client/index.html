@@ -9,13 +9,15 @@
 </head>
 <body>
     <main>
-        <label>Name:</label>
-        <input type="text" id="name-input">
-        <label>Year:</label>
-        <input type="text" id="year-input">
-        <label>Rating:</label>
-        <input type="text" id="rating-input">
-        <button id="add-info-btn">Add info</button>
+        <form>
+            <label>Name:</label>
+            <input type="text" id="name-input">
+            <label>Year:</label>
+            <input type="text" id="year-input">
+            <label>Rating:</label>
+            <input type="text" id="rating-input">
+            <input type="submit" id="add-info-btn" value="Add info"></button>
+        </form>
 
         <br><br><br>
         <div>
@@ -23,7 +25,7 @@
             <button id="search-btn">Search</button>
         </div>
 
-        <table id="table">
+        <table id="table" style="width:100%">
             <thead>
                 <th>ID</th>
                 <th>Name</th>
@@ -32,9 +34,7 @@
                 <th>Delete</th>
                 <th>Edit</th>
             </thead>
-
             <tbody></tbody>
-            
         </table>
 
     </main>
