@@ -4,6 +4,20 @@ document.addEventListener('DOMContentLoaded', () => { //function()
     .then(data => loadHTMLTable(data['data']));
 });
 
+document.querySelector('table tbody').addEventListener('click', function(event){
+    if(event.target.className === "delete-row-btn"){
+        deleteRowById(event.target.dataset.id);
+    }
+});
+
+function deleteRowById(id){
+    fetch('http://localhost:5000/delete/' + id, {
+        method: 'DELETE'
+    })
+    .then(response => response.json())
+    .then(data => console.log(data));
+}
+
 const addBtn = document.querySelector('#add-info-btn');
 
 addBtn.onclick = function (){
@@ -31,7 +45,28 @@ addBtn.onclick = function (){
 }
 
 function insertRowIntoTable(data){
+    const table = document.querySelector('table tbody');
+    const isTableData = table.querySelector('.no-data');
 
+    let tableHtml = "<tr>";
+
+    for(var key in data){
+        tableHtml += `<td>${data[key]}</td>`
+    }
+   
+    tableHtml += `<td><button class="delete-row-btn" data-id=${data.movie_id}>Delete</button></td>`;
+    tableHtml += `<td><button class="edit-row-btn" data-id=${data.movie_id}>Edit</button></td>`;
+    
+
+    tableHtml += "</tr>"
+
+    if(isTableData){
+        table.innerHTML = tableHtml;
+    }
+    else{
+        const newRow = table.insertRow();
+        newRow.innerHTML = table.html;
+    }
 }
 
 function loadHTMLTable(data){
