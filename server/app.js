@@ -10,13 +10,13 @@ const dbService = require('./dbService');
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-// let oneStepBack=path.join(__dirname,'../');
-// app.use(express.static(path.join(oneStepBack + "./client")));
+let oneStepBack=path.join(__dirname,'../');
+app.use(express.static(path.join(oneStepBack + "./client")));
 
-// app.get('/', (req, res) => {
-//     let oneStepBack=path.join(__dirname,'../');
-//     res.sendFile(path.resolve(oneStepBack + "./client/index.html"));
-// })
+app.get('/', (req, res) => {
+    let oneStepBack=path.join(__dirname,'../');
+    res.sendFile(path.resolve(oneStepBack + "./client/index.html"));
+})
 
 
 //create
@@ -41,7 +41,16 @@ app.get('/getAll', (req, res) => {
 });
 
 //update
+app.patch('/update', (req, res) =>{
+    const {id, name} = req.body;
+    const db = dbService.getDbServiceInstance();
 
+    const result = db.updateNameById(id, name);
+
+    result.then(data => res.json({success: data}))
+    .catch(err => console.log(err));
+
+})
 
 //delete
 app.delete('/delete/:id', (req, res) => {
@@ -53,6 +62,18 @@ app.delete('/delete/:id', (req, res) => {
     result.then(data => res.json({success: data}))
     .catch(err => console.log(err));
 })  
+
+//search
+app.get('/search/:name', (req, res) => {
+    const {name} = req.params;
+    const db = dbService.getDbServiceInstance();
+
+    const result = db.searchByName(name);
+
+    result.then(data => res.json({data: data}))
+    .catch(err => console.log(err));
+
+})
 
 app.listen(process.env.PORT, () => {
     console.log("app is running...");

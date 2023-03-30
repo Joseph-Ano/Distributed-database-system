@@ -8,14 +8,61 @@ document.querySelector('table tbody').addEventListener('click', function(event){
     if(event.target.className === "delete-row-btn"){
         deleteRowById(event.target.dataset.id);
     }
+
+    if(event.target.className === "edit-row-btn") {
+        handleEditRow(event.target.dataset.id);
+    }
 });
+
+const updateBtn = document.querySelector('#update-row-btn');
+const searchBtn = document.querySelector('#search-btn');
+
+searchBtn.onclick = function(){
+    const searchValue = document.querySelector('#search-input').value;
+
+    fetch('http://localhost:5000/search/' + searchValue)
+    .then(res => res.json())
+    .then(data => loadHTMLTable(data['data']));
+}
 
 function deleteRowById(id){
     fetch('http://localhost:5000/delete/' + id, {
         method: 'DELETE'
     })
     .then(response => response.json())
-    .then(data => console.log(data));
+    .then(data => {
+        if(data.success){
+            location.reload();
+        }
+    });
+}
+
+function handleEditRow(id){
+    const updateSection = document.querySelector('#update-row');
+    updateSection.hidden = false;
+    document.querySelector('#update-name-input').dataset.id = id
+    
+}
+
+updateBtn.onclick = function(){
+    const updateNameInput = document.querySelector('#update-name-input');
+
+    fetch('http://localhost:5000/update', {
+        method: 'PATCH',
+        headers: {
+            'Content-type': 'application/json'
+        },
+        body: JSON.stringify({
+            id: updateNameInput.dataset.id,
+            name: updateNameInput.value
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if(data.success){
+            location.reload();
+        }
+    })
 }
 
 const addBtn = document.querySelector('#add-info-btn');
@@ -54,8 +101,8 @@ function insertRowIntoTable(data){
         tableHtml += `<td>${data[key]}</td>`
     }
    
-    tableHtml += `<td><button class="delete-row-btn" data-id=${data.movie_id}>Delete</button></td>`;
-    tableHtml += `<td><button class="edit-row-btn" data-id=${data.movie_id}>Edit</button></td>`;
+    tableHtml += `<td><button class="delete-row-btn" data-id=${data.id}>Delete</button></td>`;
+    tableHtml += `<td><button class="edit-row-btn" data-id=${data.id}>Edit</button></td>`;
     
 
     tableHtml += "</tr>"
@@ -80,14 +127,14 @@ function loadHTMLTable(data){
 
     let tableHtml = "";
 
-    data.forEach (function ({movie_id, name, year, rating}){
+    data.forEach (function ({id, name, year, rating}){
         tableHtml += "<tr>";
-        tableHtml += `<td>${movie_id}</td>`;
+        tableHtml += `<td>${id}</td>`;
         tableHtml += `<td>${name}</td>`;
         tableHtml += `<td>${year}</td>`;
         tableHtml += `<td>${rating}</td>`;
-        tableHtml += `<td><button class="delete-row-btn" data-id=${movie_id}>Delete</button></td>`;
-        tableHtml += `<td><button class="edit-row-btn" data-id=${movie_id}>Edit</button></td>`;
+        tableHtml += `<td><button class="delete-row-btn" data-id=${id}>Delete</button></td>`;
+        tableHtml += `<td><button class="edit-row-btn" data-id=${id}>Edit</button></td>`;
         tableHtml += "</tr>";
     });
 

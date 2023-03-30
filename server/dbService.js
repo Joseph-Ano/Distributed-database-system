@@ -57,7 +57,7 @@ connection.connect((err) => {
 
             // console.log(insertId);
             return {
-                movie_id: insertId,
+                id: insertId,
                 name: name,
                 year: year,
                 rating: rating
@@ -72,7 +72,7 @@ connection.connect((err) => {
         try{
             id = parseInt(id, 10);
             const response = await new Promise((resolve, reject) => {
-                const query = "DELETE FROM movies WHERE movie_id = ?; ALTER TABLE movies AUTO_INCREMENT = 1;";
+                const query = "DELETE FROM movies WHERE _id = ?; ALTER TABLE movies AUTO_INCREMENT = 1;";
     
                 connection.query(query, [id], (err, results) => {
                     if(err) reject(new Error(err.message));
@@ -80,11 +80,50 @@ connection.connect((err) => {
                 });
             });
 
-             console.log(response);
+            //  console.log(response);
             return response === 1 ? true : false;
         }catch(err){
             console.log(err)
             return false;
+        }
+    }
+
+    async updateNameById(id, name){
+        try{
+            id = parseInt(id, 10);
+            const response = await new Promise((resolve, reject) => {
+                const query = "UPDATE movies SET name = ? WHERE id = ?";
+    
+                connection.query(query, [name, id], (err, results) => {
+                    if(err) reject(new Error(err.message));
+                    resolve(results.affectedRows);
+                });
+            });
+
+            // console.log(response);
+            return response === 1 ? true : false;
+        }catch(err){
+            console.log(err)
+            return false;
+        }
+    }
+
+    async searchByName(name){
+        try {
+            const response = await new Promise((resolve, reject) => {
+                const query = "SELECT * FROM movies WHERE name = ?;";
+
+                connection.query(query, [name], (err, results) => {
+                    if(err) reject(new Error(err.message));
+                    resolve(results);
+                });
+            });
+
+            // console.log(response);
+            return response;
+
+        } catch (err){
+            console.log(err);
         }
     }
  }
