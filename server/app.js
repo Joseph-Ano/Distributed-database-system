@@ -42,10 +42,10 @@ app.get('/getAll', (req, res) => {
 
 //update
 app.patch('/update', (req, res) =>{
-    const {id, name} = req.body;
+    const {id, rating} = req.body;
     const db = dbService.getDbServiceInstance();
 
-    const result = db.updateNameById(id, name);
+    const result = db.updateRatingById(id, rating);
 
     result.then(data => res.json({success: data}))
     .catch(err => console.log(err));

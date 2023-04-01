@@ -41,12 +41,12 @@ function deleteRowById(id){
 function handleEditRow(id){
     const updateSection = document.querySelector('#update-row');
     updateSection.hidden = false;
-    document.querySelector('#update-name-input').dataset.id = id
+    document.querySelector('#update-rating-input').dataset.id = id
     
 }
 
 updateBtn.onclick = function(){
-    const updateNameInput = document.querySelector('#update-name-input');
+    const updateRatingeInput = document.querySelector('#update-rating-input');
 
     fetch('http://localhost:5000/update', {
         method: 'PATCH',
@@ -54,8 +54,8 @@ updateBtn.onclick = function(){
             'Content-type': 'application/json'
         },
         body: JSON.stringify({
-            id: updateNameInput.dataset.id,
-            name: updateNameInput.value
+            id: updateRatingeInput.dataset.id,
+            rating: updateRatingeInput.value
         })
     })
     .then(response => response.json())

@@ -88,13 +88,14 @@ connection.connect((err) => {
         }
     }
 
-    async updateNameById(id, name){
+    async updateRatingById(id, rating){
         try{
             id = parseInt(id, 10);
+            rating = parseFloat(rating)
             const response = await new Promise((resolve, reject) => {
-                const query = "UPDATE movies SET name = ? WHERE id = ?";
+                const query = "UPDATE movies SET rating = ? WHERE id = ?";
     
-                connection.query(query, [name, id], (err, results) => {
+                connection.query(query, [rating, id], (err, results) => {
                     if(err) reject(new Error(err.message));
                     resolve(results.affectedRows);
                 });
