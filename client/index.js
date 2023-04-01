@@ -18,9 +18,10 @@ const updateBtn = document.querySelector('#update-row-btn');
 const searchBtn = document.querySelector('#search-btn');
 
 searchBtn.onclick = function(){
-    const searchValue = document.querySelector('#search-input').value;
+    const searchNameValue = document.querySelector('#search-name-input').value;
+    const searchYearValue = document.querySelector('#search-year-input').value;
 
-    fetch('http://localhost:5000/search/' + searchValue)
+    fetch('http://localhost:5000/search/' + searchNameValue + "/" + searchYearValue)
     .then(res => res.json())
     .then(data => loadHTMLTable(data['data']));
 }

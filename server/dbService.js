@@ -108,12 +108,12 @@ connection.connect((err) => {
         }
     }
 
-    async searchByName(name){
+    async searchByName(name, year){
         try {
             const response = await new Promise((resolve, reject) => {
-                const query = "SELECT * FROM movies WHERE name = ?;";
+                const query = "SELECT * FROM movies WHERE name = ? AND year = ?;";
 
-                connection.query(query, [name], (err, results) => {
+                connection.query(query, [name, year], (err, results) => {
                     if(err) reject(new Error(err.message));
                     resolve(results);
                 });

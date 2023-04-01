@@ -64,11 +64,11 @@ app.delete('/delete/:id', (req, res) => {
 })  
 
 //search
-app.get('/search/:name', (req, res) => {
-    const {name} = req.params;
+app.get('/search/:name/:year', (req, res) => {
+    const {name, year} = req.params;
     const db = dbService.getDbServiceInstance();
 
-    const result = db.searchByName(name);
+    const result = db.searchByName(name, year);
 
     result.then(data => res.json({data: data}))
     .catch(err => console.log(err));
