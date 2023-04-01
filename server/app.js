@@ -21,10 +21,10 @@ app.get('/', (req, res) => {
 
 //create
 app.post('/insert', (req, res) => {
-    const { name, year, rating } = req.body
+    const { id, name, year, rating } = req.body
     const db = dbService.getDbServiceInstance();
 
-    const result = db.insertRecord(name, year, rating);
+    const result = db.insertRecord(id, name, year, rating);
 
     result.then(data => res.json({data: data}))
     .catch(err => console.log(err));

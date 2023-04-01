@@ -4,11 +4,11 @@ let instance = null;
 dotenv.config();
 
 const connection = mysql.createConnection({
-    host: process.env.HOST,
-    user: process.env.USER,
-    password: process.env.PASSWORD,
-    database: process.env.DATABASE,
-    port: process.env.DB_PORT,
+    host: process.env.HOST1,
+    user: process.env.USER1,
+    password: process.env.PASSWORD1,
+    database: process.env.DATABASE1,
+    port: process.env.DB_PORT1,
     multipleStatements: true
 })
 
@@ -44,12 +44,12 @@ connection.connect((err) => {
         }
     }
 
-    async insertRecord(name, year, rating){
+    async insertRecord(id, name, year, rating){
         try {
             const insertId = await new Promise((resolve, reject) => {
-                const query = "INSERT INTO movies (name, year, rating) VALUES (?, ?, ?);";
+                const query = "INSERT INTO movies (id, name, year, rating) VALUES (?, ?, ?, ?);";
 
-                connection.query(query, [name, year, rating], (err, results) => {
+                connection.query(query, [id, name, year, rating], (err, results) => {
                     if(err) reject(new Error(err.message));
                     resolve(results.insertId);
                 });
@@ -72,7 +72,7 @@ connection.connect((err) => {
         try{
             id = parseInt(id, 10);
             const response = await new Promise((resolve, reject) => {
-                const query = "DELETE FROM movies WHERE _id = ?; ALTER TABLE movies AUTO_INCREMENT = 1;";
+                const query = "DELETE FROM movies WHERE id = ?; ALTER TABLE movies AUTO_INCREMENT = 1;";
     
                 connection.query(query, [id], (err, results) => {
                     if(err) reject(new Error(err.message));
@@ -112,7 +112,7 @@ connection.connect((err) => {
     async searchByName(name, year){
         try {
             const response = await new Promise((resolve, reject) => {
-                const query = "SELECT * FROM movies WHERE name = ? AND year = ?;";
+                const query = "DO SLEEP(5); SELECT * FROM movies WHERE name = ? AND year = ?;";
 
                 connection.query(query, [name, year], (err, results) => {
                     if(err) reject(new Error(err.message));
@@ -120,8 +120,8 @@ connection.connect((err) => {
                 });
             });
 
-            // console.log(response);
-            return response;
+            console.log(response);
+            return response[1];
 
         } catch (err){
             console.log(err);

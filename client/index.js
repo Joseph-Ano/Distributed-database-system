@@ -69,14 +69,17 @@ updateBtn.onclick = function(){
 const addBtn = document.querySelector('#add-info-btn');
 
 addBtn.onclick = function (){
+    const idInput = document.querySelector('#id-input');
     const nameInput = document.querySelector('#name-input');
     const yearInput = document.querySelector('#year-input');
     const ratingInput = document.querySelector('#rating-input');
 
+    const id = parseInt(idInput.value);
     const name = nameInput.value;
     const year = parseInt(yearInput.value);
     const rating = parseFloat(ratingInput.value);
 
+    idInput.value = "";
     nameInput.value = '';
     yearInput.value = '';
     ratingInput.value = '';
@@ -86,7 +89,7 @@ addBtn.onclick = function (){
             'Content-type': 'application/json'
         },
         method: 'POST',
-        body: JSON.stringify({name: name, year: year, rating: rating})
+        body: JSON.stringify({id: id, name: name, year: year, rating: rating})
     })
     .then(response => response.json())
     .then(data => insertRowIntoTable(data['data']));
