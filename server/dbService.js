@@ -204,19 +204,36 @@ connection3.connect((err) => {
 
     async searchByName(name, year){
         try {
-            const response = await new Promise((resolve, reject) => {
-                const query = "SET autocommit = 0; SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED; START TRANSACTION; DO SLEEP(1); SELECT * FROM movies WHERE name = ? AND year = ?; COMMIT;";
 
-                connection.query(query, [name, year], (err, results) => {
-                    if(err) reject(new Error(err.message));
-                    resolve(results);
+            if(year < 1980){
+                const response = await new Promise((resolve, reject) => {
+                    const query = "SET autocommit = 0; SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED; START TRANSACTION; DO SLEEP(1); SELECT * FROM movies WHERE name = ? AND year = ?; COMMIT;";
+
+                    connection2.query(query, [name, year], (err, results) => {
+                        if(err) reject(new Error(err.message));
+                        resolve(results);
+                    });
                 });
-            });
 
-            console.log(response[4][0].year);
-            return response[4];
+                console.log(response[4][0].year);
+                return response[4];
 
-        } catch (err){
+            } 
+
+            else{
+                const response = await new Promise((resolve, reject) => {
+                    const query = "SET autocommit = 0; SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED; START TRANSACTION; DO SLEEP(1); SELECT * FROM movies WHERE name = ? AND year = ?; COMMIT;";
+
+                    connection3.query(query, [name, year], (err, results) => {
+                        if(err) reject(new Error(err.message));
+                        resolve(results);
+                    });
+                });
+
+                console.log(response[4][0].year);
+                return response[4];
+            }
+        }catch (err){
             console.log(err);
         }
     }
