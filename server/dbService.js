@@ -12,6 +12,24 @@ const connection = mysql.createConnection({
     multipleStatements: true
 })
 
+const connection2 = mysql.createConnection({
+    host: process.env.HOST2,
+    user: process.env.USER2,
+    password: process.env.PASSWORD2,
+    database: process.env.DATABASE2,
+    port: process.env.DB_PORT2,
+    multipleStatements: true
+})
+
+const connection3 = mysql.createConnection({
+    host: process.env.HOST3,
+    user: process.env.USER3,
+    password: process.env.PASSWORD3,
+    database: process.env.DATABASE3,
+    port: process.env.DB_PORT3,
+    multipleStatements: true
+})
+
 connection.connect((err) => {
     if(err){
         console.log(err.message);
@@ -20,12 +38,33 @@ connection.connect((err) => {
     console.log('db ' + connection.state);
 })
 
+connection2.connect((err) => {
+    if(err){
+        console.log(err.message);
+    }
+    
+    console.log('db ' + connection.state);
+})
+
+connection3.connect((err) => {
+    if(err){
+        console.log(err.message);
+    }
+    
+    console.log('db ' + connection.state);
+})
+
+
+
  class DbService {
     static getDbServiceInstance(){
         return instance ? instance : new DbService();
     }
 
     async getAllData(){
+        // console.log(connection.state)
+        // console.log(connection2.state)
+        // console.log(connection3.state)
         try {
             const response = await new Promise((resolve, reject) => {
                 const query = "SELECT * FROM movies;";
@@ -97,12 +136,45 @@ connection.connect((err) => {
     
                 connection.query(query, [rating, id], (err, results) => {
                     if(err) reject(new Error(err.message));
-                    resolve(results.affectedRows);
+                    resolve(results);
                 });
             });
 
+            const year = await new Promise((resolve, reject) => {
+                const query = "SELECT * FROM movies WHERE id = ?";
+
+                connection.query(query, [id], (err, results) => {
+                    if(err) reject(new Error(err.message));
+                    resolve(results);
+                });
+            });
+
+            //console.log(year[0].year)
+
+            if(year[0].year < 1980){
+                const nodeUpdate  = await new Promise((resolve, reject) => {
+                    const query = "UPDATE movies SET rating = ? WHERE id = ?";
+        
+                    connection2.query(query, [rating, id], (err, results) => {
+                        if(err) reject(new Error(err.message));
+                        resolve(results);
+                    });
+                });
+            }
+
+            else{
+                const nodeUpdate  = await new Promise((resolve, reject) => {
+                    const query = "UPDATE movies SET rating = ? WHERE id = ?";
+        
+                    connection3.query(query, [rating, id], (err, results) => {
+                        if(err) reject(new Error(err.message));
+                        resolve(results);
+                    });
+                });
+            }
+
             // console.log(response);
-            return response === 1 ? true : false;
+            return response.affectedRows === 1 ? true : false;
         }catch(err){
             console.log(err)
             return false;
@@ -112,7 +184,7 @@ connection.connect((err) => {
     async searchByName(name, year){
         try {
             const response = await new Promise((resolve, reject) => {
-                const query = "DO SLEEP(5); SELECT * FROM movies WHERE name = ? AND year = ?;";
+                const query = "SET autocommit = 0; SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED; START TRANSACTION; DO SLEEP(1); SELECT * FROM movies WHERE name = ? AND year = ?; COMMIT;";
 
                 connection.query(query, [name, year], (err, results) => {
                     if(err) reject(new Error(err.message));
@@ -120,8 +192,8 @@ connection.connect((err) => {
                 });
             });
 
-            console.log(response);
-            return response[1];
+            console.log(response[4][0].year);
+            return response[4];
 
         } catch (err){
             console.log(err);
