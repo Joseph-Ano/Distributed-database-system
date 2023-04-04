@@ -94,6 +94,27 @@ connection3.connect((err) => {
                 });
             });
 
+            if(year < 1980){
+                const node2Insert = await new Promise((resolve, reject) => {
+                    const query = "INSERT INTO movies (id, name, year, rating) VALUES (?, ?, ?, ?);";
+    
+                    connection2.query(query, [id, name, year, rating], (err, results) => {
+                        if(err) reject(new Error(err.message));
+                        resolve(results.insertId);
+                    });
+                });
+            }
+            else{
+                const node3Insert = await new Promise((resolve, reject) => {
+                    const query = "INSERT INTO movies (id, name, year, rating) VALUES (?, ?, ?, ?);";
+    
+                    connection3.query(query, [id, name, year, rating], (err, results) => {
+                        if(err) reject(new Error(err.message));
+                        resolve(results.insertId);
+                    });
+                });
+            }
+
             // console.log(insertId);
             return {
                 id: insertId,
