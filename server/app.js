@@ -75,6 +75,16 @@ app.get('/search/:name/:year', (req, res) => {
 
 })
 
+//report
+app.get('/report', (req, res) => {
+    const db = dbService.getDbServiceInstance();
+
+    const result = db.getReport();
+
+    result.then(data => res.json({data: data}))
+    .catch(err => console.log(err));
+});
+
 app.listen(process.env.PORT, () => {
     console.log("app is running...");
 });

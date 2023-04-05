@@ -16,6 +16,16 @@ document.querySelector('table tbody').addEventListener('click', function(event){
 
 const updateBtn = document.querySelector('#update-row-btn');
 const searchBtn = document.querySelector('#search-btn');
+const reportBtn = document.querySelector('#generate-report');
+
+reportBtn.onclick = function(){
+    const reportTable = document.querySelector('#report-table');
+    reportTable.hidden = false
+
+    fetch('http://localhost:5000/report')
+    .then(res => res.json())
+    .then(data => loadReport(data['data']));
+}
 
 searchBtn.onclick = function(){
     const searchNameValue = document.querySelector('#search-name-input').value;
@@ -121,7 +131,7 @@ function insertRowIntoTable(data){
 }
 
 function loadHTMLTable(data){
-    const table = document.querySelector('table tbody');
+    const table = document.querySelector('#table tbody');
     // console.log(data)
 
     if(data.length === 0){
@@ -139,6 +149,22 @@ function loadHTMLTable(data){
         tableHtml += `<td>${rating}</td>`;
         tableHtml += `<td><button class="delete-row-btn" data-id=${id}>Delete</button></td>`;
         tableHtml += `<td><button class="edit-row-btn" data-id=${id}>Edit</button></td>`;
+        tableHtml += "</tr>";
+    });
+
+    table.innerHTML = tableHtml;
+}
+
+function loadReport(data){
+    const table = document.querySelector('#report-table tbody');
+    console.log(data)
+
+    let tableHtml = "";
+
+    data.forEach (function ({year, rating}){
+        tableHtml += "<tr>";
+        tableHtml += `<td>${year}</td>`;
+        tableHtml += `<td>${rating}</td>`;
         tableHtml += "</tr>";
     });
 

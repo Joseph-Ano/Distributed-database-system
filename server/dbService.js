@@ -185,11 +185,11 @@ connection3.connect((err) => {
 
             else{
                 const nodeUpdate  = await new Promise((resolve, reject) => {
-                    const query = "UPDATE movies SET rating = ? WHERE id = ?";
+                    const query = "SET autocommit = 0; UPDATE movies SET rating = ? WHERE id = ?";
         
                     connection3.query(query, [rating, id], (err, results) => {
                         if(err) reject(new Error(err.message));
-                        resolve(results);
+                        resolve(results[1]);
                     });
                 });
             }
@@ -234,6 +234,29 @@ connection3.connect((err) => {
                 return response[4];
             }
         }catch (err){
+            console.log(err);
+        }
+    }
+
+
+    async getReport(){
+        // console.log(connection.state)
+        // console.log(connection2.state)
+        // console.log(connection3.state)
+        try {
+            const response = await new Promise((resolve, reject) => {
+                const query = "SELECT year, ROUND(AVG(rating), 2) AS rating FROM movies GROUP BY year ORDER BY year DESC;";
+
+                connection.query(query, (err, results) => {
+                    if(err) reject(new Error(err.message));
+                    resolve(results);
+                });
+            });
+
+            // console.log(response);
+            return response;
+
+        } catch (err){
             console.log(err);
         }
     }
