@@ -161,9 +161,10 @@ function loadReport(data){
 
     let tableHtml = "";
 
-    data.forEach (function ({year, rating}){
+    data.forEach (function ({year, name, rating}){
         tableHtml += "<tr>";
         tableHtml += `<td>${year}</td>`;
+        tableHtml += `<td>${name}</td>`;
         tableHtml += `<td>${rating}</td>`;
         tableHtml += "</tr>";
     });

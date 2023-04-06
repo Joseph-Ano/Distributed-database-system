@@ -35,7 +35,7 @@ connection.connect((err) => {
         console.log(err.message);
     }
     
-    console.log('db ' + connection.state);
+    console.log('db1 ' + connection.state);
 })
 
 connection2.connect((err) => {
@@ -43,7 +43,7 @@ connection2.connect((err) => {
         console.log(err.message);
     }
     
-    console.log('db ' + connection.state);
+    console.log('db2 ' + connection.state);
 })
 
 connection3.connect((err) => {
@@ -51,7 +51,7 @@ connection3.connect((err) => {
         console.log(err.message);
     }
     
-    console.log('db ' + connection.state);
+    console.log('db3 ' + connection.state);
 })
 
 
@@ -184,12 +184,12 @@ connection3.connect((err) => {
             }
 
             else{
-                const nodeUpdate  = await new Promise((resolve, reject) => {
-                    const query = "SET autocommit = 0; UPDATE movies SET rating = ? WHERE id = ?";
+                const nodeUpdate2  = await new Promise((resolve, reject) => {
+                    const query = "UPDATE movies SET rating = ? WHERE id = ?";
         
                     connection3.query(query, [rating, id], (err, results) => {
                         if(err) reject(new Error(err.message));
-                        resolve(results[1]);
+                        resolve(results);
                     });
                 });
             }
@@ -207,7 +207,8 @@ connection3.connect((err) => {
 
             if(year < 1980){
                 const response = await new Promise((resolve, reject) => {
-                    const query = "SET autocommit = 0; SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED; START TRANSACTION; DO SLEEP(1); SELECT * FROM movies WHERE name = ? AND year = ?; COMMIT;";
+                    const query = `SET autocommit = 0; SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED; 
+                    START TRANSACTION; DO SLEEP(1); SELECT * FROM movies WHERE name = ? AND year = ?; COMMIT;`;
 
                     connection2.query(query, [name, year], (err, results) => {
                         if(err) reject(new Error(err.message));
@@ -245,15 +246,22 @@ connection3.connect((err) => {
         // console.log(connection3.state)
         try {
             const response = await new Promise((resolve, reject) => {
-                const query = "SELECT year, ROUND(AVG(rating), 2) AS rating FROM movies GROUP BY year ORDER BY year DESC;";
+                const query = `SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+                START TRANSACTION;
+                WITH subquery1 as (SELECT \`year\`, MAX(rating) as rating FROM movies GROUP BY \`year\`)
+                SELECT m.\`year\`, m.\`name\`, m.rating FROM movies m JOIN subquery1 s ON  m.\`year\`=s.\`year\` AND m.rating=s.rating ORDER BY m.\`year\` DESC;
+                DO SLEEP(5);
+                WITH subquery1 as (SELECT \`year\`, MAX(rating) as rating FROM movies GROUP BY \`year\`)
+                SELECT m.\`year\`, m.\`name\`, m.rating FROM movies m JOIN subquery1 s ON  m.\`year\`=s.\`year\` AND m.rating=s.rating ORDER BY m.\`year\` DESC;
+                COMMIT;`;
 
                 connection.query(query, (err, results) => {
                     if(err) reject(new Error(err.message));
-                    resolve(results);
+                    resolve(results[4]);
                 });
             });
 
-            // console.log(response);
+            console.log(response);
             return response;
 
         } catch (err){
