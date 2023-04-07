@@ -62,18 +62,39 @@ connection3.connect((err) => {
     }
 
     async getAllData(){
-        // console.log(connection.state)
-        // console.log(connection2.state)
-        // console.log(connection3.state)
         try {
-            const response = await new Promise((resolve, reject) => {
-                const query = "SELECT * FROM movies;";
+            let response = null
+            if(connection.state != "disconnected"){
+                response = await new Promise((resolve, reject) => {
+                    const query = "SELECT * FROM movies;";
 
-                connection.query(query, (err, results) => {
-                    if(err) reject(new Error(err.message));
-                    resolve(results);
+                    connection.query(query, (err, results) => {
+                        if(err) reject(new Error(err.message));
+                        resolve(results);
+                    });
                 });
-            });
+            }
+            else{
+                let node2 = await new Promise((resolve, reject) => {
+                    const query = "SELECT * FROM movies;";
+
+                    connection2.query(query, (err, results) => {
+                        if(err) reject(new Error(err.message));
+                        resolve(results);
+                    });
+                });
+
+                let node3 = await new Promise((resolve, reject) => {
+                    const query = "SELECT * FROM movies;";
+
+                    connection3.query(query, (err, results) => {
+                        if(err) reject(new Error(err.message));
+                        resolve(results);
+                    });
+                });
+
+                response = node2.concat(node3)
+            }
 
             // console.log(response);
             return response;
@@ -239,7 +260,6 @@ connection3.connect((err) => {
 
     async searchByName(name, year){
         try {
-
             if(year < 1980){
                 const response = await new Promise((resolve, reject) => {
                     const query = `SET autocommit = 0; SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED; 
