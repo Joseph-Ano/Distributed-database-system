@@ -88,7 +88,7 @@ connection3.connect((err) => {
                     });
                 });
 
-                response = node2.concat(node3)
+                response = node3.concat(node2)
             }
             return response;
 
