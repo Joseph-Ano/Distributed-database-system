@@ -1,6 +1,5 @@
 const mysql = require("mysql");
 const dotenv = require('dotenv');
-const nodemon = require("nodemon");
 let instance = null;
 dotenv.config();
 
