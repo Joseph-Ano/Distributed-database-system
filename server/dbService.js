@@ -64,10 +64,9 @@ connection3.connect((err) => {
     async getAllData(){
         try {
             let response = null
+            const query = "SELECT * FROM movies;"
             if(connection.state != "disconnected"){
                 response = await new Promise((resolve, reject) => {
-                    const query = "SELECT * FROM movies;";
-
                     connection.query(query, (err, results) => {
                         if(err) reject(new Error(err.message));
                         resolve(results);
@@ -76,8 +75,6 @@ connection3.connect((err) => {
             }
             else{
                 let node2 = await new Promise((resolve, reject) => {
-                    const query = "SELECT * FROM movies;";
-
                     connection2.query(query, (err, results) => {
                         if(err) reject(new Error(err.message));
                         resolve(results);
@@ -85,8 +82,6 @@ connection3.connect((err) => {
                 });
 
                 let node3 = await new Promise((resolve, reject) => {
-                    const query = "SELECT * FROM movies;";
-
                     connection3.query(query, (err, results) => {
                         if(err) reject(new Error(err.message));
                         resolve(results);
@@ -95,8 +90,6 @@ connection3.connect((err) => {
 
                 response = node2.concat(node3)
             }
-
-            // console.log(response);
             return response;
 
         } catch (err){
@@ -106,9 +99,9 @@ connection3.connect((err) => {
 
     async insertRecord(id, name, year, rating){
         try {
-            const insertId = await new Promise((resolve, reject) => {
-                const query = "INSERT INTO movies (id, name, year, rating) VALUES (?, ?, ?, ?);";
+            const query = "INSERT INTO movies (id, name, year, rating) VALUES (?, ?, ?, ?);";
 
+            const insertId = await new Promise((resolve, reject) => {
                 connection.query(query, [id, name, year, rating], (err, results) => {
                     if(err) reject(new Error(err.message));
                     resolve(results.insertId);
@@ -117,8 +110,6 @@ connection3.connect((err) => {
 
             if(year < 1980){
                 const node2Insert = await new Promise((resolve, reject) => {
-                    const query = "INSERT INTO movies (id, name, year, rating) VALUES (?, ?, ?, ?);";
-    
                     connection2.query(query, [id, name, year, rating], (err, results) => {
                         if(err) reject(new Error(err.message));
                         resolve(results.insertId);
@@ -127,8 +118,6 @@ connection3.connect((err) => {
             }
             else{
                 const node3Insert = await new Promise((resolve, reject) => {
-                    const query = "INSERT INTO movies (id, name, year, rating) VALUES (?, ?, ?, ?);";
-    
                     connection3.query(query, [id, name, year, rating], (err, results) => {
                         if(err) reject(new Error(err.message));
                         resolve(results.insertId);
@@ -136,7 +125,6 @@ connection3.connect((err) => {
                 });
             }
 
-            // console.log(insertId);
             return {
                 id: insertId,
                 name: name,
@@ -154,30 +142,25 @@ connection3.connect((err) => {
             id = parseInt(id, 10);
 
             const year = await new Promise((resolve, reject) => {
-                const query = "SELECT * FROM movies WHERE id = ?";
+                const queryYear = "SELECT * FROM movies WHERE id = ?";
 
-                connection.query(query, [id], (err, results) => {
+                connection.query(queryYear, [id], (err, results) => {
                     if(err) reject(new Error(err.message));
                     resolve(results);
                 });
             });
 
+            const query = "DELETE FROM movies WHERE id = ?; ALTER TABLE movies AUTO_INCREMENT = 1;";
+
             const response = await new Promise((resolve, reject) => {
-                const query = "DELETE FROM movies WHERE id = ?; ALTER TABLE movies AUTO_INCREMENT = 1;";
-    
                 connection.query(query, [id], (err, results) => {
                     if(err) reject(new Error(err.message));
                     resolve(results[0].affectedRows);
                 });
             });
 
-
-            //console.log(year[0].year)
-
             if(year[0].year < 1980){
-                const nodeUpdate  = await new Promise((resolve, reject) => {
-                    const query = "DELETE FROM movies WHERE id = ?";
-        
+                const nodeUpdate  = await new Promise((resolve, reject) => {       
                     connection2.query(query, [id], (err, results) => {
                         if(err) reject(new Error(err.message));
                         resolve(results);
@@ -187,17 +170,14 @@ connection3.connect((err) => {
 
             else{
                 const nodeUpdate2  = await new Promise((resolve, reject) => {
-                    const query = "DELETE FROM movies WHERE id = ?";
-        
                     connection3.query(query, [id], (err, results) => {
                         if(err) reject(new Error(err.message));
                         resolve(results);
                     });
                 });
             }
-
-            //  console.log(response);
             return response === 1 ? true : false;
+            
         }catch(err){
             console.log(err)
             return false;
@@ -226,8 +206,6 @@ connection3.connect((err) => {
                 });
             });
 
-            //console.log(year[0].year)
-
             if(year[0].year < 1980){
                 const nodeUpdate  = await new Promise((resolve, reject) => {
                     const query = "UPDATE movies SET rating = ? WHERE id = ?";
@@ -249,8 +227,6 @@ connection3.connect((err) => {
                     });
                 });
             }
-
-            // console.log(response);
             return response.affectedRows === 1 ? true : false;
         }catch(err){
             console.log(err)
@@ -261,14 +237,15 @@ connection3.connect((err) => {
     async searchByName(name, year){
         try {
             let response = null;
+            const query = `SET autocommit = 0; 
+                            SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED; 
+                            START TRANSACTION; DO SLEEP(1); 
+                            SELECT * FROM movies WHERE name = ? AND year = ?; 
+                            COMMIT;`;
+
             if(year < 1980){
                 if(connection2.state != "disconnected"){
                      response = await new Promise((resolve, reject) => {
-                        const query = `SET autocommit = 0; 
-                                        SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED; 
-                                        START TRANSACTION; DO SLEEP(1); 
-                                        SELECT * FROM movies WHERE name = ? AND year = ?; 
-                                        COMMIT;`;
 
                         connection2.query(query, [name, year], (err, results) => {
                             if(err) reject(new Error(err.message));
@@ -278,12 +255,6 @@ connection3.connect((err) => {
                 }
                 else{
                     response = await new Promise((resolve, reject) => {
-                        const query = `SET autocommit = 0; 
-                                        SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED; 
-                                        START TRANSACTION; DO SLEEP(1); 
-                                        SELECT * FROM movies WHERE name = ? AND year = ?; 
-                                        COMMIT;`;
-
                         connection.query(query, [name, year], (err, results) => {
                             if(err) reject(new Error(err.message));
                             resolve(results);
@@ -297,12 +268,6 @@ connection3.connect((err) => {
             else{
                 if(connection3.state != "disconnected"){
                     response = await new Promise((resolve, reject) => {
-                        const query = `SET autocommit = 0; 
-                                        SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED; 
-                                        START TRANSACTION; DO SLEEP(1); 
-                                        SELECT * FROM movies WHERE name = ? AND year = ?;
-                                        COMMIT;`;
-
                         connection3.query(query, [name, year], (err, results) => {
                             if(err) reject(new Error(err.message));
                             resolve(results);
@@ -311,12 +276,6 @@ connection3.connect((err) => {
                 }
                 else{
                     response = await new Promise((resolve, reject) => {
-                        const query = `SET autocommit = 0; 
-                                        SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED; 
-                                        START TRANSACTION; DO SLEEP(1); 
-                                        SELECT * FROM movies WHERE name = ? AND year = ?; 
-                                        COMMIT;`;
-
                         connection.query(query, [name, year], (err, results) => {
                             if(err) reject(new Error(err.message));
                             resolve(results);
@@ -332,9 +291,6 @@ connection3.connect((err) => {
 
 
     async getReport(){
-        // console.log(connection.state)
-        // console.log(connection2.state)
-        // console.log(connection3.state)
         try {
             const response = await new Promise((resolve, reject) => {
                 const query = `SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
