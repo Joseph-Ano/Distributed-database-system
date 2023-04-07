@@ -131,6 +131,16 @@ connection3.connect((err) => {
     async deleteRowById(id){
         try{
             id = parseInt(id, 10);
+
+            const year = await new Promise((resolve, reject) => {
+                const query = "SELECT * FROM movies WHERE id = ?";
+
+                connection.query(query, [id], (err, results) => {
+                    if(err) reject(new Error(err.message));
+                    resolve(results);
+                });
+            });
+
             const response = await new Promise((resolve, reject) => {
                 const query = "DELETE FROM movies WHERE id = ?; ALTER TABLE movies AUTO_INCREMENT = 1;";
     
@@ -139,6 +149,31 @@ connection3.connect((err) => {
                     resolve(results[0].affectedRows);
                 });
             });
+
+
+            //console.log(year[0].year)
+
+            if(year[0].year < 1980){
+                const nodeUpdate  = await new Promise((resolve, reject) => {
+                    const query = "DELETE FROM movies WHERE id = ?";
+        
+                    connection2.query(query, [id], (err, results) => {
+                        if(err) reject(new Error(err.message));
+                        resolve(results);
+                    });
+                });
+            }
+
+            else{
+                const nodeUpdate2  = await new Promise((resolve, reject) => {
+                    const query = "DELETE FROM movies WHERE id = ?";
+        
+                    connection3.query(query, [id], (err, results) => {
+                        if(err) reject(new Error(err.message));
+                        resolve(results);
+                    });
+                });
+            }
 
             //  console.log(response);
             return response === 1 ? true : false;
