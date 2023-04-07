@@ -1,5 +1,6 @@
 const mysql = require("mysql");
 const dotenv = require('dotenv');
+const nodemon = require("nodemon");
 let instance = null;
 dotenv.config();
 
@@ -292,8 +293,7 @@ connection3.connect((err) => {
 
     async getReport(){
         try {
-            const response = await new Promise((resolve, reject) => {
-                const query = `SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+            const query = `SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
                 START TRANSACTION;
                 WITH subquery1 as (SELECT \`year\`, MAX(rating) as rating FROM movies GROUP BY \`year\`)
                 SELECT m.\`year\`, m.\`name\`, m.rating FROM movies m JOIN subquery1 s ON  m.\`year\`=s.\`year\` AND m.rating=s.rating ORDER BY m.\`year\` DESC;
@@ -301,14 +301,34 @@ connection3.connect((err) => {
                 WITH subquery1 as (SELECT \`year\`, MAX(rating) as rating FROM movies GROUP BY \`year\`)
                 SELECT m.\`year\`, m.\`name\`, m.rating FROM movies m JOIN subquery1 s ON  m.\`year\`=s.\`year\` AND m.rating=s.rating ORDER BY m.\`year\` DESC;
                 COMMIT;`;
-
-                connection.query(query, (err, results) => {
-                    if(err) reject(new Error(err.message));
-                    resolve(results[4]);
+            let response = null;
+            
+            if(connection.state != "disconnected"){
+                response = await new Promise((resolve, reject) => {
+                    connection.query(query, (err, results) => {
+                        if(err) reject(new Error(err.message));
+                        resolve(results[4]);
+                    });
                 });
-            });
+            }
 
-            console.log(response);
+            else{
+                const node2 = await new Promise((resolve, reject) => {
+                    connection2.query(query, (err, results) => {
+                        if(err) reject(new Error(err.message));
+                        resolve(results[4]);
+                    });
+                });
+
+                const node3 = await new Promise((resolve, reject) => {
+                    connection3.query(query, (err, results) => {
+                        if(err) reject(new Error(err.message));
+                        resolve(results[4]);
+                    });
+                });
+
+                response = node3.concat(node2)
+            }
             return response;
 
         } catch (err){
