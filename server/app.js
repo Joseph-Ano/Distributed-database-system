@@ -36,9 +36,9 @@ app.get('/getAll', (req, res) => {
 
     const result = db.getAllData();
 
-    db.perform_recover("node1")
-    db.perform_recover("node2")
-    db.perform_recover("node3")
+    db.perform_recovery("node1")
+    db.perform_recovery("node2")
+    db.perform_recovery("node3")
 
     result.then(data => res.json({data: data}))
     .catch(err => console.log(err));
