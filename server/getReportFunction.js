@@ -1,4 +1,4 @@
-async function getReport(connection1, connection2, connection3){
+async function getReport(node1_db, node2_db, node3_db){
     const query = `SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
             START TRANSACTION;
             WITH subquery1 as (SELECT \`year\`, MAX(rating) as rating FROM movies GROUP BY \`year\`)
@@ -7,11 +7,10 @@ async function getReport(connection1, connection2, connection3){
             WITH subquery1 as (SELECT \`year\`, MAX(rating) as rating FROM movies GROUP BY \`year\`)
             SELECT m.\`year\`, m.\`name\`, m.rating FROM movies m JOIN subquery1 s ON  m.\`year\`=s.\`year\` AND m.rating=s.rating ORDER BY m.\`year\` DESC;
             COMMIT;`;
-    let response = null;
 
     try {
-        response = await new Promise((resolve, reject) => {
-            connection1.query(query, (err, results) => {
+        const response = await new Promise((resolve, reject) => {
+            node1_db.query(query, (err, results) => {
                 if(err) reject(new Error(err.message));
                 resolve(results);
             });
@@ -19,23 +18,25 @@ async function getReport(connection1, connection2, connection3){
         
         return response[4];
 
-    } catch (err){
+    } 
+    catch (err){
         console.log("getReportFunction: Central node is unavailable");
-        const node2 = await new Promise((resolve, reject) => {
-            connection2.query(query, (err, results) => {
+
+        const getRecordsFromNode2 = await new Promise((resolve, reject) => {
+            node2_db.query(query, (err, results) => {
                 if(err) reject(new Error(err.message));
                 resolve(results[4]);
             });
         });
 
-        const node3 = await new Promise((resolve, reject) => {
-            connection3.query(query, (err, results) => {
+        const getRecordsFromNode3 = await new Promise((resolve, reject) => {
+            node3_db.query(query, (err, results) => {
                 if(err) reject(new Error(err.message));
                 resolve(results[4]);
             });
         });
 
-        response = node3.concat(node2)
+        const response = getRecordsFromNode3.concat(getRecordsFromNode2)
         return response;
     }
 }

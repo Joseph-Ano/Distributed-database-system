@@ -1,4 +1,4 @@
-async function searchByName(name, year, connection1, connection2, connection3){
+async function searchByName(name, year, node1_db, node2_db, node3_db){
     let response = null;
     const query = `SET autocommit = 0; 
                     SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED; 
@@ -9,7 +9,7 @@ async function searchByName(name, year, connection1, connection2, connection3){
     if(year < 1980){
         try{
             response = await new Promise((resolve, reject) => {
-                connection2.query(query, [name, year], (err, results) => {
+                node2_db.query(query, [name, year], (err, results) => {
                     if(err) reject(new Error(err.message));
                     resolve(results);
                 });
@@ -18,7 +18,7 @@ async function searchByName(name, year, connection1, connection2, connection3){
         catch(err){
             console.log("searchByNameFunction: Node 2 is unavailable for search");
             response = await new Promise((resolve, reject) => {
-                connection1.query(query, [name, year], (err, results) => {
+                node1_db.query(query, [name, year], (err, results) => {
                     if(err) reject(new Error(err.message));
                     resolve(results);
                 });
@@ -31,7 +31,7 @@ async function searchByName(name, year, connection1, connection2, connection3){
     else{
         try{
             response = await new Promise((resolve, reject) => {
-                connection3.query(query, [name, year], (err, results) => {
+                node3_db.query(query, [name, year], (err, results) => {
                     if(err) reject(new Error(err.message));
                     resolve(results);
                 });
@@ -40,7 +40,7 @@ async function searchByName(name, year, connection1, connection2, connection3){
         catch(err){
             console.log("searchByNameFunction: Node 3 is unavailable for search");
             response = await new Promise((resolve, reject) => {
-                connection1.query(query, [name, year], (err, results) => {
+                node1_db.query(query, [name, year], (err, results) => {
                     if(err) reject(new Error(err.message));
                     resolve(results);
                 });

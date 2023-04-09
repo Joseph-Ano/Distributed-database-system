@@ -1,16 +1,17 @@
-async function updateRatingById(id, rating, connection1, connection2, connection3, recovery1, recovery2, recovery3){
-    id = parseInt(id, 10);
-    rating = parseFloat(rating)
+async function updateRatingById(id, rating, node1_db, node2_db, node3_db, node1_recovery, node2_recovery, node3_recovery){
     const recoveryQuery = `INSERT INTO recovery (transaction_no, movie_id, operation, name_old_val, 
         name_new_val, year_old_val, year_new_val, rating_old_val, rating_new_val) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);`
     const transaction_no = Math.floor(Math.random() * 100);
 
+    id = parseInt(id, 10);
+    rating = parseFloat(rating)
+
     try{
         const record = await new Promise((resolve, reject) => {
             const query = "SELECT * FROM movies WHERE id = ?";
             
-            connection1.query(query, [id], (err, results) => {
+            node1_db.query(query, [id], (err, results) => {
                 if(err) reject(new Error(err.message));
                 resolve(results);
             });
@@ -19,7 +20,7 @@ async function updateRatingById(id, rating, connection1, connection2, connection
         const response = await new Promise((resolve, reject) => {
             const query = "UPDATE movies SET rating = ? WHERE id = ?";
 
-            connection1.query(query, [rating, id], (err, results) => {
+            node1_db.query(query, [rating, id], (err, results) => {
                 if(err) reject(new Error(err.message));
                 resolve(results);
             });
@@ -27,9 +28,9 @@ async function updateRatingById(id, rating, connection1, connection2, connection
 
         if(record[0].year < 1980){
             try{
-                const nodeUpdate2  = await new Promise((resolve, reject) => {
+                const updateNode2  = await new Promise((resolve, reject) => {
                     const query = "UPDATE movies SET rating = ? WHERE id = ?"
-                    connection2.query(query, [rating, id], (err, results) => {
+                    node2_db.query(query, [rating, id], (err, results) => {
                         if(err) reject(new Error(err.message));
                         resolve(results);
                     });
@@ -38,14 +39,14 @@ async function updateRatingById(id, rating, connection1, connection2, connection
             catch(err){
                 console.log("updateRatingByIdFunction: node 2 is unavailable for update");
 
-                const recoveryDb2 = await new Promise((resolve, reject) => {
-                    recovery2.query(recoveryQuery, [transaction_no, id, "update", record[0].name, record[0].name, record[0].year, record[0].year, record[0].rating, rating], (err, results) => {
+                const updateRecovery2 = await new Promise((resolve, reject) => {
+                    node2_recovery.query(recoveryQuery, [transaction_no, id, "update", record[0].name, record[0].name, record[0].year, record[0].year, record[0].rating, rating], (err, results) => {
                         if(err) reject(new Error(err.message));
                         resolve(results);
                     });
                 });
                 const commitQuery = await new Promise((resolve, reject) => {
-                    recovery2.query(recoveryQuery, [transaction_no, id, "commit", record[0].name, record[0].name, record[0].year, record[0].year, record[0].rating, rating], (err, results) => {
+                    node2_recovery.query(recoveryQuery, [transaction_no, id, "commit", record[0].name, record[0].name, record[0].year, record[0].year, record[0].rating, rating], (err, results) => {
                         if(err) reject(new Error(err.message));
                         resolve(results);
                     });
@@ -54,9 +55,9 @@ async function updateRatingById(id, rating, connection1, connection2, connection
         }
         else{
             try{
-                const nodeUpdate3  = await new Promise((resolve, reject) => {
+                const updateNode3  = await new Promise((resolve, reject) => {
                     const query = "UPDATE movies SET rating = ? WHERE id = ?";
-                    connection3.query(query, [rating, id], (err, results) => {
+                    node3_db.query(query, [rating, id], (err, results) => {
                         if(err) reject(new Error(err.message));
                         resolve(results);
                     });
@@ -64,14 +65,16 @@ async function updateRatingById(id, rating, connection1, connection2, connection
             }
             catch(err){
                 console.log("updateRatingByIdFunction: node 3 is unavailable for update");
-                const recoveryDb3 = await new Promise((resolve, reject) => {
-                    recovery3.query(recoveryQuery, [transaction_no, id, "update", record[0].name, record[0].name, record[0].year, record[0].year, record[0].rating, rating], (err, results) => {
+
+                const updateRecovery3 = await new Promise((resolve, reject) => {
+                    node3_recovery.query(recoveryQuery, [transaction_no, id, "update", record[0].name, record[0].name, record[0].year, record[0].year, record[0].rating, rating], (err, results) => {
                         if(err) reject(new Error(err.message));
                         resolve(results);
                     });
                 });
+
                 const commitQuery = await new Promise((resolve, reject) => {
-                    recovery3.query(recoveryQuery, [transaction_no, id, "commit", record[0].name, record[0].name, record[0].year, record[0].year, record[0].rating, rating], (err, results) => {
+                    node3_recovery.query(recoveryQuery, [transaction_no, id, "commit", record[0].name, record[0].name, record[0].year, record[0].year, record[0].rating, rating], (err, results) => {
                         if(err) reject(new Error(err.message));
                         resolve(results);
                     });
@@ -89,7 +92,7 @@ async function updateRatingById(id, rating, connection1, connection2, connection
         record = await new Promise((resolve, reject) => {
             const query = "SELECT * FROM movies WHERE id = ?";
             
-            connection2.query(query, [id], (err, results) => {
+            node2_db.query(query, [id], (err, results) => {
                 if(err) reject(new Error(err.message));
                 resolve(results);
             });
@@ -99,7 +102,7 @@ async function updateRatingById(id, rating, connection1, connection2, connection
             record = await new Promise((resolve, reject) => {
                 const query = "SELECT * FROM movies WHERE id = ?";
                 
-                connection3.query(query, [id], (err, results) => {
+                node3_db.query(query, [id], (err, results) => {
                     if(err) reject(new Error(err.message));
                     resolve(results);
                 });
@@ -107,7 +110,7 @@ async function updateRatingById(id, rating, connection1, connection2, connection
 
             response  = await new Promise((resolve, reject) => {
                 const query = "UPDATE movies SET rating = ? WHERE id = ?";
-                connection3.query(query, [rating, id], (err, results) => {
+                node3_db.query(query, [rating, id], (err, results) => {
                     if(err) reject(new Error(err.message));
                     resolve(results);
                 });
@@ -116,22 +119,22 @@ async function updateRatingById(id, rating, connection1, connection2, connection
         else{
             response  = await new Promise((resolve, reject) => {
                 const query = "UPDATE movies SET rating = ? WHERE id = ?";
-                connection2.query(query, [rating, id], (err, results) => {
+                node2_db.query(query, [rating, id], (err, results) => {
                     if(err) reject(new Error(err.message));
                     resolve(results);
                 });
             });
         }
     
-        const recoveryDb1 = await new Promise((resolve, reject) => {
-            recovery1.query(recoveryQuery, [transaction_no, id, "update", record[0].name, record[0].name, record[0].year, record[0].year, record[0].rating, rating], (err, results) => {
+        const updateRecovery1 = await new Promise((resolve, reject) => {
+            node1_recovery.query(recoveryQuery, [transaction_no, id, "update", record[0].name, record[0].name, record[0].year, record[0].year, record[0].rating, rating], (err, results) => {
                 if(err) reject(new Error(err.message));
                 resolve(results);
             });
         });
 
         const commitQuery = await new Promise((resolve, reject) => {
-            recovery1.query(recoveryQuery, [transaction_no, id, "commit", record[0].name, record[0].name, record[0].year, record[0].year, record[0].rating, rating], (err, results) => {
+            node1_recovery.query(recoveryQuery, [transaction_no, id, "commit", record[0].name, record[0].name, record[0].year, record[0].year, record[0].rating, rating], (err, results) => {
                 if(err) reject(new Error(err.message));
                 resolve(results);
             });

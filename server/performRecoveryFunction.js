@@ -1,20 +1,19 @@
-async function perform_recovery(db, connection1, connection2, connection3, recovery1, recovery2, recovery3){
+async function perform_recovery(db, node1_db, node2_db, node3_db, node1_recovery, node2_recovery, node3_recovery){
     let query = `SELECT * FROM recovery WHERE operation = "insert"`
     let recovery_db = null;
     let actual_db = null;
-    let temp = null;
 
     if(db == "node1"){
-        recovery_db = recovery1
-        actual_db = connection1
+        recovery_db = node1_recovery
+        actual_db = node1_db
     }
     else if(db == "node2"){
-        recovery_db = recovery2
-        actual_db = connection2
+        recovery_db = node2_recovery
+        actual_db = node2_db
     }
     else{
-        recovery_db = recovery3
-        actual_db = connection3
+        recovery_db = node3_recovery
+        actual_db = node3_db
     }
     
     try{
@@ -128,7 +127,7 @@ async function perform_recovery(db, connection1, connection2, connection3, recov
         }); 
     }
     catch(err){
-        console.log(err)
+        console.log("Recovery: Recovery database unavailable")
     }
 }
 

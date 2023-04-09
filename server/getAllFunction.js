@@ -1,32 +1,34 @@
-async function getAllData(connection1, connection2, connection3){
+async function getAllData(node1_db, node2_db, node3_db){
     const query = "SELECT * FROM movies;"
-    let response = null
     try {
-        response = await new Promise((resolve, reject) => {
-            connection1.query(query, (err, results) => {
+        const response = await new Promise((resolve, reject) => {
+            node1_db.query(query, (err, results) => {
                 if(err) reject(new Error(err.message));
                 else resolve(results);
             });
         });
         
         return response;
-    } catch (err){
+    } 
+    catch (err){
         console.log("getAllFunction: Central node is unavailable");
-        let node2 = await new Promise((resolve, reject) => {
-            connection2.query(query, (err, results) => {
+
+        const getAllRecordsInNode2 = await new Promise((resolve, reject) => {
+            node2_db.query(query, (err, results) => {
                 if(err) reject(new Error(err.message));
                 else resolve(results);
             });
         });
 
-        let node3 = await new Promise((resolve, reject) => {
-            connection3.query(query, (err, results) => {
+        const getAllRecordsInNode3 = await new Promise((resolve, reject) => {
+            node3_db.query(query, (err, results) => {
                 if(err) reject(new Error(err.message));
                 else resolve(results);
             });
         });
 
-        response = node3.concat(node2)
+        const response = getAllRecordsInNode3.concat(getAllRecordsInNode2)
+
         return response
     }
 }

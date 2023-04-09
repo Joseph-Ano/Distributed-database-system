@@ -1,6 +1,5 @@
 const mysql = require("mysql");
 const dotenv = require('dotenv');
-const { response } = require("express");
 const {getAllData} = require("./getAllFunction.js")
 const {insertRecord} = require("./insertRecordFunction.js")
 const {searchByName} = require("./searchByNameFunction.js")
@@ -11,7 +10,7 @@ const {perform_recovery} = require("./performRecoveryFunction.js")
 let instance = null;
 dotenv.config();
 
-const connection1 = mysql.createConnection({
+const node1_db = mysql.createConnection({
     host: process.env.HOST1,
     user: process.env.USER1,
     password: process.env.PASSWORD1,
@@ -20,7 +19,7 @@ const connection1 = mysql.createConnection({
     multipleStatements: true
 })
 
-const connection2 = mysql.createConnection({
+const node2_db = mysql.createConnection({
     host: process.env.HOST2,
     user: process.env.USER2,
     password: process.env.PASSWORD2,
@@ -29,7 +28,7 @@ const connection2 = mysql.createConnection({
     multipleStatements: true
 })
 
-const connection3 = mysql.createConnection({
+const node3_db = mysql.createConnection({
     host: process.env.HOST3,
     user: process.env.USER3,
     password: process.env.PASSWORD3,
@@ -38,7 +37,7 @@ const connection3 = mysql.createConnection({
     multipleStatements: true
 })
 
-const recovery1 = mysql.createConnection({
+const node1_recovery = mysql.createConnection({
     host: process.env.RECOVERY_HOST1,
     user: process.env.RECOVERY_USER1,
     password: process.env.RECOVERY_PASSWORD1,
@@ -47,7 +46,7 @@ const recovery1 = mysql.createConnection({
     multipleStatements: true
 })
 
-const recovery2 = mysql.createConnection({
+const node2_recovery = mysql.createConnection({
     host: process.env.RECOVERY_HOST2,
     user: process.env.RECOVERY_USER2,
     password: process.env.RECOVERY_PASSWORD2,
@@ -56,7 +55,7 @@ const recovery2 = mysql.createConnection({
     multipleStatements: true
 })
 
-const recovery3 = mysql.createConnection({
+const node3_recovery = mysql.createConnection({
     host: process.env.RECOVERY_HOST3,
     user: process.env.RECOVERY_USER3,
     password: process.env.RECOVERY_PASSWORD3,
@@ -65,51 +64,51 @@ const recovery3 = mysql.createConnection({
     multipleStatements: true
 })
 
-connection1.connect((err) => {
+node1_db.connect((err) => {
     if(err){
         console.log(err.message);
     }
     
-    console.log('db1 ' + connection1.state);
+    console.log('node1_db ' + node1_db.state);
 })
 
-connection2.connect((err) => {
+node2_db.connect((err) => {
     if(err){
         console.log(err.message);
     }
     
-    console.log('db2 ' + connection2.state);
+    console.log('node2_db ' + node2_db.state);
 })
 
-connection3.connect((err) => {
+node3_db.connect((err) => {
     if(err){
         console.log(err.message);
     }
     
-    console.log('db3 ' + connection3.state);
+    console.log('node3_db ' + node3_db.state);
 })
 
-recovery1.connect((err) => {
+node1_recovery.connect((err) => {
     if(err){
         console.log(err.message);
     }
     
-    console.log('recovery1 ' + recovery1.state);
+    console.log('node1_recovery ' + node1_recovery.state);
 })
 
-recovery2.connect((err) => {
+node2_recovery.connect((err) => {
     if(err){
         console.log(err.message);
     }
     
-    console.log('recovery2 ' + recovery2.state);
+    console.log('node2_recovery ' + node2_recovery.state);
 })
 
-recovery3.connect((err) => {
+node3_recovery.connect((err) => {
     if(err){
         console.log(err.message);
     }
-    console.log('recovery3 ' + recovery3.state);
+    console.log('node3_recovery ' + node3_recovery.state);
 })
 
  class DbService {
@@ -118,31 +117,31 @@ recovery3.connect((err) => {
     }
 
     async getAllData(){
-        return getAllData(connection1, connection2, connection3);
+        return getAllData(node1_db, node2_db, node3_db);
     }
 
     async insertRecord(id, name, year, rating){
-        return insertRecord(id, name, year, rating, connection1, connection2, connection3, recovery1, recovery2, recovery3);
+        return insertRecord(id, name, year, rating, node1_db, node2_db, node3_db, node1_recovery, node2_recovery, node3_recovery);
     }
 
     async deleteRowById(id){
-        return deleteRowById(id, connection1, connection2, connection3);
+        return deleteRowById(id, node1_db, node2_db, node3_db);
     }
 
     async updateRatingById(id, rating){
-        return updateRatingById(id, rating, connection1, connection2, connection3, recovery1, recovery2, recovery3);
+        return updateRatingById(id, rating, node1_db, node2_db, node3_db, node1_recovery, node2_recovery, node3_recovery);
     }
 
     async searchByName(name, year){
-        return searchByName(name, year, connection1, connection2, connection3);
+        return searchByName(name, year, node1_db, node2_db, node3_db);
     }
 
     async getReport(){
-        return getReport(connection1, connection2, connection3);
+        return getReport(node1_db, node2_db, node3_db);
     }
 
     async perform_recovery(db){
-        perform_recovery(db, connection1, connection2, connection3, recovery1, recovery2, recovery3)
+        perform_recovery(db, node1_db, node2_db, node3_db, node1_recovery, node2_recovery, node3_recovery)
     }
  }
 
