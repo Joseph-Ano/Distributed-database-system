@@ -18,7 +18,12 @@ async function updateRatingById(id, rating, node1_db, node2_db, node3_db, node1_
         });
         
         const response = await new Promise((resolve, reject) => {
-            const query = "UPDATE movies SET rating = ? WHERE id = ?";
+            const query = `SET autocommit = 0; 
+                LOCK TABLES movies WRITE; 
+                UPDATE movies SET rating = ? WHERE id = ?;
+                DO SLEEP(1); 
+                COMMIT; 
+                UNLOCK TABLES;`;
 
             node1_db.query(query, [rating, id], (err, results) => {
                 if(err) reject(new Error(err.message));
@@ -81,11 +86,16 @@ async function updateRatingById(id, rating, node1_db, node2_db, node3_db, node1_
                 });
             }
         }
-        return response.affectedRows === 1 ? true : false;
+        return response[2].affectedRows === 1 ? true : false;
 
     }catch(err){
         console.log("updateRatingByIdFunction: Central node is unavailable for update");
-
+        const query = `SET autocommit = 0; 
+                        LOCK TABLES movies WRITE; 
+                        UPDATE movies SET rating = ? WHERE id = ?;
+                        DO SLEEP(1); 
+                        COMMIT; 
+                        UNLOCK TABLES;`;
         let response = null;
         let record = null;
 
@@ -109,7 +119,6 @@ async function updateRatingById(id, rating, node1_db, node2_db, node3_db, node1_
             });
 
             response  = await new Promise((resolve, reject) => {
-                const query = "UPDATE movies SET rating = ? WHERE id = ?";
                 node3_db.query(query, [rating, id], (err, results) => {
                     if(err) reject(new Error(err.message));
                     resolve(results);
@@ -118,7 +127,6 @@ async function updateRatingById(id, rating, node1_db, node2_db, node3_db, node1_
         }
         else{
             response  = await new Promise((resolve, reject) => {
-                const query = "UPDATE movies SET rating = ? WHERE id = ?";
                 node2_db.query(query, [rating, id], (err, results) => {
                     if(err) reject(new Error(err.message));
                     resolve(results);
@@ -140,7 +148,7 @@ async function updateRatingById(id, rating, node1_db, node2_db, node3_db, node1_
             });
         });
 
-        return response.affectedRows === 1 ? true : false;
+        return response[2].affectedRows === 1 ? true : false;
     }
 }
 

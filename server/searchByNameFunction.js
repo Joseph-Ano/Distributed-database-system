@@ -1,7 +1,7 @@
 async function searchByName(name, year, node1_db, node2_db, node3_db){
     let response = null;
     const query = `SET autocommit = 0; 
-                    SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED; 
+                    SET TRANSACTION ISOLATION LEVEL READ COMMITTED; 
                     START TRANSACTION; DO SLEEP(1); 
                     SELECT * FROM movies WHERE name = ? AND year = ?; 
                     COMMIT;`;
