@@ -34,7 +34,10 @@ async function updateRatingById(id, rating, node1_db, node2_db, node3_db, node1_
         if(record[0].year < 1980){
             try{
                 const updateNode2  = await new Promise((resolve, reject) => {
-                    const query = "UPDATE movies SET rating = ? WHERE id = ?"
+                    const query = `SET autocommit = 0; 
+                                    SET TRANSACTION ISOLATION LEVEL READ COMMITTED; 
+                                    UPDATE movies SET rating = ? WHERE id = ?;
+                                    COMMIT;`;
                     node2_db.query(query, [rating, id], (err, results) => {
                         if(err) reject(new Error(err.message));
                         resolve(results);
@@ -61,7 +64,10 @@ async function updateRatingById(id, rating, node1_db, node2_db, node3_db, node1_
         else{
             try{
                 const updateNode3  = await new Promise((resolve, reject) => {
-                    const query = "UPDATE movies SET rating = ? WHERE id = ?";
+                    const query = `SET autocommit = 0; 
+                                    SET TRANSACTION ISOLATION LEVEL READ COMMITTED; 
+                                    UPDATE movies SET rating = ? WHERE id = ?;
+                                    COMMIT;`;
                     node3_db.query(query, [rating, id], (err, results) => {
                         if(err) reject(new Error(err.message));
                         resolve(results);
